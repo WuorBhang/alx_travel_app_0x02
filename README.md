@@ -228,6 +228,9 @@ alx_travel_app/
     ├── urls.py          # App URL routes
     └── views.py         # API views
 ```
+## Author
+
+WuorBhang
 
 ## 🏁 License
 
