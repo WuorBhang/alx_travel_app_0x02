@@ -1,78 +1,60 @@
-# listings/models.py
-
-from django.contrib.auth import get_user_model
+# Create your models here.
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+import uuid
 
+class Payment(models.Model):
+    booking_reference = models.CharField(max_length=100)
+    transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, default="Pending")
+    created_at = models.DateTimeField(auto_now_add=True)
 
-User = get_user_model()
+    def __str__(self):
+        return f"{self.booking_reference} - {self.status}"
 
+class User(AbstractUser): 
+    first_name = models.CharField(max_length=225)
+    last_name = models.CharField(max_length=225)
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=20)
+    role = models.CharField(max_length=50)
+    password = models.CharField(max_length=225)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return super().__str__()
 
 class Listing(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
-    max_guests = models.PositiveIntegerField()
+    location = models.CharField(max_length=255)
+    price_per_night = models.DecimalField(max_digits=8, decimal_places=2)
+    available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
 
 
 class Booking(models.Model):
-    STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("confirmed", "Confirmed"),
-        ("cancelled", "Cancelled"),
-    ]
-
-    listing = models.ForeignKey(
-        Listing, on_delete=models.CASCADE, related_name="bookings"
-    )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    listing = models.ForeignKey(Listing, related_name='bookings', on_delete=models.CASCADE)
+    user_name = models.CharField(max_length=255)
+    user_email = models.EmailField()
+    check_in = models.DateField()
+    check_out = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.email} - {self.listing.title}"
+        return f"{self.user_name} - {self.listing.title}"
 
 
 class Review(models.Model):
-    RATING_CHOICES = [
-        (1, "1 Star"),
-        (2, "2 Stars"),
-        (3, "3 Stars"),
-        (4, "4 Stars"),
-        (5, "5 Stars"),
-    ]
-
-    listing = models.ForeignKey(
-        Listing, on_delete=models.CASCADE, related_name="reviews"
-    )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES)
-    comment = models.TextField(blank=True)
+    listing = models.ForeignKey(Listing, related_name='reviews', on_delete=models.CASCADE)
+    user_name = models.CharField(max_length=255)
+    rating = models.PositiveIntegerField()
+    comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.rating} stars for {self.listing.title}"
-    
-class Payment(models.Model):
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Success', 'Success'),
-        ('Failed', 'Failed'),
-    ]
-
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=3, default="ETB")
-    transaction_id = models.CharField(max_length=100, blank=True, null=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.booking.user.username} - {self.amount} - {self.status}"
+        return f"{self.user_name} - {self.rating}/5"
