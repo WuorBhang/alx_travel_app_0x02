@@ -1,75 +1,47 @@
-# alx_travel_app/urls.py
-
 """
-URL configuration for alx_travel_app project.
+URL configuration for alx_travel_app_0x01 project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
+    https://docs.djangoproject.com/en/5.1/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
-from django.urls import include, path
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-from rest_framework import permissions
+from django.urls import path, include
 
-# Schema view for API documentation
+urlpatterns = [
+    path('admin/', admin.site.urls),
+]
+
+#added
+from django.urls import include
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
 schema_view = get_schema_view(
-    openapi.Info(
-        title="ALX Travel App API",
-        default_version="v1",
-        description="""
-        API for the ALX Travel App - A platform for booking travel accommodations.
-        
-        ## Authentication
-        This API uses session authentication by default. Make sure to include the session cookie 
-        in your requests when authentication is required.
-        
-        ## Endpoints
-        - `/api/listings/` - Manage travel listings
-        - `/api/bookings/` - Manage bookings
-        - `/api/docs/` - Interactive API documentation
-        """,
-        terms_of_service="https://www.example.com/terms/",
-        contact=openapi.Contact(email="contact@alx.com"),
-        license=openapi.License(name="ALX License"),
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
+   openapi.Info(
+      title="ALX Travel App API",
+      default_version='v1',
+      description="API for Listings and Bookings",
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+   
 )
 
 urlpatterns = [
-    # Admin site
-    path("admin/", admin.site.urls),
-    # API endpoints
-    path(
-        "api/",
-        include(
-            [
-                # API v1
-                path(
-                    "v1/",
-                    include(
-                        [
-                            # Listings app
-                            path("listings/", include("listings.urls")),
-                            # Add more app URLs here as needed
-                        ]
-                    ),
-                ),
-                # API documentation
-                path(
-                    "docs/",
-                    schema_view.with_ui("swagger", cache_timeout=0),
-                    name="schema-swagger-ui",
-                ),
-                path(
-                    "redoc/",
-                    schema_view.with_ui("redoc", cache_timeout=0),
-                    name="schema-redoc",
-                ),
-            ]
-        ),
-    ),
-    path('api/', include('listings.urls')),
+    path('admin/', admin.site.urls),
+    path('', include('listings.urls')),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('listings/', include('listings.urls')),  # optional routing placeholder
 ]
+#ends
